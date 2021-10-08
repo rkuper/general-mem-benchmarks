@@ -15,91 +15,103 @@ cd $BENCHMARK_ROOT
 ####################################
 #            Benchmarks            #
 ####################################
-{
-  echo "#############################"
-  echo "#   DeathStarBench: Media   #"
-  echo "#############################"
-  cd ../deathstarbench/mediaMicroservices
-  sudo docker-compose up -d;
+for bench in "${benches[@]}"
+do
+  case $bench in
+    dsb)
+      {
+        echo "#############################"
+        echo "#   DeathStarBench: Media   #"
+        echo "#############################"
+        cd ../deathstarbench/mediaMicroservices
+        sudo docker-compose up -d;
 
-  echo "PCM Core Test Beginning:"
-  echo "========================"
-  for run in $(eval echo {1..$total_runs})
-  do
-    sudo pcm --external_program sudo /home/rkuper2/Documents/benchmarks/deathstarbench/mediaMicroservices/wrk2/wrk -D exp -L -s /home/rkuper2/Documents/benchmarks/deathstarbench/mediaMicroservices/wrk2/scripts/media-microservices/compose-review.lua http://localhost:8080/wrk2-api/review/compose -R 10000 -d 600
-  done
+        echo "PCM Core Test Beginning:"
+        echo "========================"
+        for run in $(eval echo {1..$total_runs})
+        do
+          sudo pcm --external_program sudo /home/rkuper2/Documents/benchmarks/deathstarbench/mediaMicroservices/wrk2/wrk -D exp -L -s /home/rkuper2/Documents/benchmarks/deathstarbench/mediaMicroservices/wrk2/scripts/media-microservices/compose-review.lua http://localhost:8080/wrk2-api/review/compose -R 10000 -d 300
+        done
 
-  echo "PCM Memory Test Beginning:"
-  echo "=========================="
-  for run in $(eval echo {1..$total_runs})
-  do
-    sudo pcm-memory --external_program sudo /home/rkuper2/Documents/benchmarks/deathstarbench/mediaMicroservices/wrk2/wrk -D exp -L -s /home/rkuper2/Documents/benchmarks/deathstarbench/mediaMicroservices/wrk2/scripts/media-microservices/compose-review.lua http://localhost:8080/wrk2-api/review/compose -R 10000 -d 600
-  done
-  cd ../../
-} > dsb_temp.txt
-
-
-
-{
-  echo "#############################"
-  echo "#            YCSB           #"
-  echo "#############################"
-  echo "PCM Core Test Beginning:"
-  echo "========================"
-  for run in $(eval echo {1..$total_runs})
-  do
-    sudo pcm --external_program sudo /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/bin/ycsb load basic -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/workloads/workloada -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/large.dat -s -threads 10 -target 15000 > load.dat
-    tail -n 110 temp_load.txt
-    sudo pcm --external_program sudo /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/bin/ycsb run basic -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/workloads/workloada -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/large.dat -s -threads 10 -target 15000 > transactions.dat
-    tail -n 110 temp_txn.txt; rm load.dat transactions.dat
-  done
-
-  echo "PCM Memory Test Beginning:"
-  echo "=========================="
-  for run in $(eval echo {1..$total_runs})
-  do
-    sudo pcm-memory --external_program sudo /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/bin/ycsb load basic -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/workloads/workloada -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/large.dat -threads 10 -target 15000 > load.dat
-    tail -n 110 load.dat
-    sudo pcm-memory --external_program sudo /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/bin/ycsb run basic -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/workloads/workloada -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/large.dat -threads 10 -target 15000 > transactions.dat
- > temp_txn.txt
-    tail -n 110 temp_txn.txt; rm load.dat transactions.dat
-  done
-} > ycsb_temp.txt
+        echo "PCM Memory Test Beginning:"
+        echo "=========================="
+        for run in $(eval echo {1..$total_runs})
+        do
+          sudo pcm-memory --external_program sudo /home/rkuper2/Documents/benchmarks/deathstarbench/mediaMicroservices/wrk2/wrk -D exp -L -s /home/rkuper2/Documents/benchmarks/deathstarbench/mediaMicroservices/wrk2/scripts/media-microservices/compose-review.lua http://localhost:8080/wrk2-api/review/compose -R 10000 -d 300
+        done
+        cd ../../
+      } > dsb_temp.txt
+			;;
 
 
-{
-  echo "#############################"
-  echo "#          GraphBig         #"
-  echo "#############################"
-  cd ../graphbig
 
-  echo "PCM Core Test Beginning:"
-  echo "========================"
-  for run in $(eval echo {1..$total_runs})
-  do
-    sudo pcm --external_program sudo make run
-  done
+    ycsb)
+      {
+        echo "#############################"
+        echo "#            YCSB           #"
+        echo "#############################"
+        echo "PCM Core Test Beginning:"
+        echo "========================"
+        for run in $(eval echo {1..$total_runs})
+        do
+          sudo pcm --external_program sudo /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/bin/ycsb load basic -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/workloads/workloada -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/large.dat -s -threads 10 -target 15000 > load.dat
+          tail -n 110 temp_load.txt
+          sudo pcm --external_program sudo /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/bin/ycsb run basic -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/workloads/workloada -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/large.dat -s -threads 10 -target 15000 > transactions.dat
+          tail -n 110 temp_txn.txt; rm load.dat transactions.dat
+        done
 
-  echo "PCM Memory Test Beginning:"
-  echo "=========================="
-  for run in $(eval echo {1..$total_runs})
-  do
-    sudo pcm-memory --external_program sudo make run
-  done
-  sudo make run
-  cat output.log
-} > graphbig_temp.txt
+        echo "PCM Memory Test Beginning:"
+        echo "=========================="
+        for run in $(eval echo {1..$total_runs})
+        do
+          sudo pcm-memory --external_program sudo /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/bin/ycsb load basic -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/workloads/workloada -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/large.dat -threads 10 -target 15000 > load.dat
+          tail -n 110 load.dat
+          sudo pcm-memory --external_program sudo /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/bin/ycsb run basic -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/workloads/workloada -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/large.dat -threads 10 -target 15000 > transactions.dat
+       > temp_txn.txt
+          tail -n 110 temp_txn.txt; rm load.dat transactions.dat
+        done
+      } > ycsb_temp.txt
+			;;
+
+
+
+    graphbig)
+      {
+        echo "#############################"
+        echo "#          GraphBig         #"
+        echo "#############################"
+        cd ../graphbig
+
+        echo "PCM Core Test Beginning:"
+        echo "========================"
+        for run in $(eval echo {1..$total_runs})
+        do
+          sudo pcm --external_program sudo make run
+        done
+
+        echo "PCM Memory Test Beginning:"
+        echo "=========================="
+        for run in $(eval echo {1..$total_runs})
+        do
+          sudo pcm-memory --external_program sudo make run
+        done
+        sudo make run
+        cat output.log
+      } > graphbig_temp.txt
+			;;
+	esac
+done
 
 
 
 ####################################
 #             Metrics              #
 ####################################
-for bench in "${arr[@]}"
+for bench in "${benches[@]}"
 do
   echo "Averages for benchmark $bench"
 
-  case $benchmark in
+  case $bench in
     dsb)
 		  echo "Requests/sec: " \
     		`awk '/Requests\/sec/ {sum += $2; n++} END { if (n > 0) print sum / n; }' \
