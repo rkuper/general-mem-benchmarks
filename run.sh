@@ -4,6 +4,13 @@ total_runs=$([ $# -gt 0 ] && echo "$1" || echo "1")
 declare -a benches=("dsb" "ycsb" "graphbig")
 keep_logs=$([ $2 == "true" ] && echo "true" || echo "false")
 
+if [[ -z "${BENCHMARK_ROOT}" ]]; then
+  BENCHMARK_ROOT=/home/rkuper2/Documents/benchmarks
+else
+  BENCHMARK_ROOT="${BENCHMARK_ROOT}"
+fi
+cd $BENCHMARK_ROOT
+
 
 ####################################
 #            Benchmarks            #
@@ -41,20 +48,21 @@ keep_logs=$([ $2 == "true" ] && echo "true" || echo "false")
   echo "========================"
   for run in $(eval echo {1..$total_runs})
   do
-    sudo pcm --external_program sudo /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/bin/ycsb load basic -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/workloads/workloada -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/large.dat > temp_load.txt
-    tail -n 110 temp_load.txt; rm temp_load.txt
-    sudo pcm --external_program sudo /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/bin/ycsb run basic -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/workloads/workloada -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/large.dat -s -threads 10 -target 100 -p measurementtype=timeseries -p timeseries.granularity=2000 > temp_txn.txt
-    tail -n 110 temp_txn.txt; rm temp_txn.txt
+    sudo pcm --external_program sudo /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/bin/ycsb load basic -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/workloads/workloada -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/large.dat -s -threads 10 -target 15000 > load.dat
+    tail -n 110 temp_load.txt
+    sudo pcm --external_program sudo /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/bin/ycsb run basic -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/workloads/workloada -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/large.dat -s -threads 10 -target 15000 > transactions.dat
+    tail -n 110 temp_txn.txt; rm load.dat transactions.dat
   done
 
   echo "PCM Memory Test Beginning:"
   echo "=========================="
   for run in $(eval echo {1..$total_runs})
   do
-    sudo pcm-memory --external_program sudo /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/bin/ycsb load basic -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/workloads/workloada -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/large.dat > temp_load.txt
-    tail -n 110 temp_load.txt; rm temp_load.txt
-    sudo pcm-memory --external_program sudo /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/bin/ycsb run basic -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/workloads/workloada -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/large.dat -s -threads 10 -target 100 -p measurementtype=timeseries -p timeseries.granularity=2000 > temp_txn.txt
-    tail -n 110 temp_txn.txt; rm temp_txn.txt
+    sudo pcm-memory --external_program sudo /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/bin/ycsb load basic -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/workloads/workloada -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/large.dat -threads 10 -target 15000 > load.dat
+    tail -n 110 load.dat
+    sudo pcm-memory --external_program sudo /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/bin/ycsb run basic -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/workloads/workloada -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/large.dat -threads 10 -target 15000 > transactions.dat
+ > temp_txn.txt
+    tail -n 110 temp_txn.txt; rm load.dat transactions.dat
   done
 } > ycsb_temp.txt
 
@@ -143,25 +151,21 @@ do
       echo "Insert Throughput (ops/sec): " $(( insert_throughput_sum / insert_throughput_num ))
       echo "Update/Read Throughput (ops/sec): " $(( other_throughput_sum / other_throughput_num ))
 
-  		echo "Insert Latency (us): " \
-    		`awk '/\[INSERT\], AverageLatency/ {sum += $3; n++} END { if (n > 0) print sum / n; }' \
-    		./"$bench"_temp.txt`
+      operations=("INSERT" "READ" "UPDATE")
+      for operation in "${operations[@]}"
+      do
+  		  echo "$operation Latency (us): " \
+    	  	`awk '/\['"$operation"'\], AverageLatency/ {sum += $3; n++} END { if (n > 0) print sum / n; }' \
+    	  	./"$bench"_temp.txt`
 
-  		echo "Insert 95% Tail Latency (us): " \
-    		`awk '/\[INSERT\], 95thPercentileLatency/ {sum += $3; n++} END { if (n > 0) print sum / n; }' \
-    		./"$bench"_temp.txt`
+  		  echo "$operation 95% Tail Latency (us): " \
+    	  	`awk '/\['"$operation"'\], 95thPercentileLatency/ {sum += $3; n++} END { if (n > 0) print sum / n; }' \
+    	  	./"$bench"_temp.txt`
 
-  		echo "Insert 99% Tail Latency (us): " \
-    		`awk '/\[INSERT\], 99thPercentileLatency/ {sum += $3; n++} END { if (n > 0) print sum / n; }' \
-    		./"$bench"_temp.txt`
-
-  		echo "Read Latency (us): " \
-    		`awk '/\[READ\], AverageLatency/ {sum += $3; n++} END { if (n > 0) print sum / n; }' \
-    		./"$bench"_temp.txt`
-
-  		echo "Update Latency (us): " \
-    		`awk '/\[UPDATE\], AverageLatency/ {sum += $3; n++} END { if (n > 0) print sum / n; }' \
-    		./"$bench"_temp.txt`
+  		  echo "$operation 99% Tail Latency (us): " \
+    	  	`awk '/\['"$operation"'\], 99thPercentileLatency/ {sum += $3; n++} END { if (n > 0) print sum / n; }' \
+    	  	./"$bench"_temp.txt`
+			done
       ;;
 
     graphbig)
