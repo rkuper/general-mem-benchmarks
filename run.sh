@@ -83,6 +83,7 @@ keep_logs=$([ $2 == "true" ] && echo "true" || echo "false")
 } > graphbig_temp.txt
 
 
+
 ####################################
 #             Metrics              #
 ####################################
@@ -92,6 +93,20 @@ do
 
   case $benchmark in
     dsb)
+		  echo "Requests/sec: " \
+    		`awk '/Requests\/sec/ {sum += $2; n++} END { if (n > 0) print sum / n; }' \
+    		./"$bench"_temp.txt`
+
+		  echo "Transfer/sec: " \
+    		`awk '/Transfer\/sec/ {sum += substr($2, 1, length($2)-2); n++} END { if (n > 0) print sum / n; }' \
+    		./"$bench"_temp.txt`
+
+		  echo "Average Latency: " \
+    		`awk '/Thread Stats / {getline; \
+					if (substr($2, length($2), length($2)) == "m") sum += substr($2, 1, length($2)-1) * 60; \
+					else sum += substr($2, 1, length($2)-1); n++} END { if (n > 0) print sum / n; }' \
+    		./"$bench"_temp.txt`
+
       tail_vals=("50.000%" "90.000%" "99.000%")
       for tail_val in "${tail_vals[@]}"
       do
@@ -103,6 +118,7 @@ do
           ./"$bench"_temp.txt`
 			done
 			;;
+
     ycsb)
       insert_throughput_num=0
       insert_throughput_sum=0
@@ -126,7 +142,28 @@ do
       done
       echo "Insert Throughput (ops/sec): " $(( insert_throughput_sum / insert_throughput_num ))
       echo "Update/Read Throughput (ops/sec): " $(( other_throughput_sum / other_throughput_num ))
+
+  		echo "Insert Latency (us): " \
+    		`awk '/\[INSERT\], AverageLatency/ {sum += $3; n++} END { if (n > 0) print sum / n; }' \
+    		./"$bench"_temp.txt`
+
+  		echo "Insert 95% Tail Latency (us): " \
+    		`awk '/\[INSERT\], 95thPercentileLatency/ {sum += $3; n++} END { if (n > 0) print sum / n; }' \
+    		./"$bench"_temp.txt`
+
+  		echo "Insert 99% Tail Latency (us): " \
+    		`awk '/\[INSERT\], 99thPercentileLatency/ {sum += $3; n++} END { if (n > 0) print sum / n; }' \
+    		./"$bench"_temp.txt`
+
+  		echo "Read Latency (us): " \
+    		`awk '/\[READ\], AverageLatency/ {sum += $3; n++} END { if (n > 0) print sum / n; }' \
+    		./"$bench"_temp.txt`
+
+  		echo "Update Latency (us): " \
+    		`awk '/\[UPDATE\], AverageLatency/ {sum += $3; n++} END { if (n > 0) print sum / n; }' \
+    		./"$bench"_temp.txt`
       ;;
+
     graphbig)
       ;;
   esac
@@ -135,15 +172,15 @@ do
     `awk '/\ TOTAL\ / { sum += $4; n++} END { if (n > 0) print sum / n; }' \
     ./"$bench"_temp.txt`
 
-  echo "L2HIT: " \
+  echo "L2 Hit Rate: " \
     `awk '/\ TOTAL\ / {sum += $12; n++} END { if (n > 0) print sum / n}' \
     ./"$bench"_temp.txt`
 
-  echo "L3HIT: " \
+  echo "L3 Hit Rate: " \
     `awk '/\ TOTAL\ / {sum += $11; n++} END { if (n > 0) print sum / n}' \
     ./"$bench"_temp.txt`
 
-  echo "LLCRDMISSLAT: " \
+  echo "LLC Read Miss Latency: " \
     `awk '/LLCRDMISSLAT \(ns\)/ {getline; getline; sum += $9; n++} END { if (n > 0) print sum / n; }' \
     ./"$bench"_temp.txt`
 
