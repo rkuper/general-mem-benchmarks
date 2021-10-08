@@ -23,7 +23,7 @@ do
         echo "#############################"
         echo "#   DeathStarBench: Media   #"
         echo "#############################"
-        cd ../deathstarbench/mediaMicroservices
+        cd deathstarbench/mediaMicroservices
         sudo docker-compose up -d;
 
         echo "PCM Core Test Beginning:"
@@ -40,7 +40,7 @@ do
           sudo pcm-memory --external_program sudo /home/rkuper2/Documents/benchmarks/deathstarbench/mediaMicroservices/wrk2/wrk -D exp -L -s /home/rkuper2/Documents/benchmarks/deathstarbench/mediaMicroservices/wrk2/scripts/media-microservices/compose-review.lua http://localhost:8080/wrk2-api/review/compose -R 10000 -d 300
         done
         cd ../../
-      } > dsb_temp.txt
+      } > $BENCHMARK_ROOT/dsb_temp.txt
 			;;
 
 
@@ -50,27 +50,31 @@ do
         echo "#############################"
         echo "#            YCSB           #"
         echo "#############################"
+
+				sudo /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/bin/ycsb load basic -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/workloads/workloada -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/large.dat -threads 10 -target 15000 > load.dat
+
         echo "PCM Core Test Beginning:"
         echo "========================"
         for run in $(eval echo {1..$total_runs})
         do
-          sudo pcm --external_program sudo /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/bin/ycsb load basic -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/workloads/workloada -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/large.dat -s -threads 10 -target 15000 > load.dat
-          tail -n 110 temp_load.txt
-          sudo pcm --external_program sudo /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/bin/ycsb run basic -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/workloads/workloada -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/large.dat -s -threads 10 -target 15000 > transactions.dat
-          tail -n 110 temp_txn.txt; rm load.dat transactions.dat
+          # sudo pcm --external_program sudo /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/bin/ycsb load basic -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/workloads/workloada -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/large.dat -threads 10 -target 15000 > load.dat
+          # tail -n 110 load.dat
+          sudo pcm --external_program sudo /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/bin/ycsb run basic -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/workloads/workloada -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/large.dat -threads 10 -target 15000 > transactions.dat
+          # tail -n 110 transactions.dat; rm transactions.dat
+          tail -n 110 transactions.dat; rm load.dat transactions.dat
         done
 
         echo "PCM Memory Test Beginning:"
         echo "=========================="
         for run in $(eval echo {1..$total_runs})
         do
-          sudo pcm-memory --external_program sudo /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/bin/ycsb load basic -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/workloads/workloada -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/large.dat -threads 10 -target 15000 > load.dat
-          tail -n 110 load.dat
+          # sudo pcm-memory --external_program sudo /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/bin/ycsb load basic -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/workloads/workloada -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/large.dat -threads 10 -target 15000 > load.dat
+          # tail -n 110 load.dat
           sudo pcm-memory --external_program sudo /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/bin/ycsb run basic -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/workloads/workloada -P /home/rkuper2/Documents/benchmarks/ycsb-0.17.0/large.dat -threads 10 -target 15000 > transactions.dat
-       > temp_txn.txt
-          tail -n 110 temp_txn.txt; rm load.dat transactions.dat
+          # tail -n 110 transactions.dat; rm load.dat transactions.dat
+          tail -n 110 transactions.dat; rm transactions.dat
         done
-      } > ycsb_temp.txt
+      } > $BENCHMARK_ROOT/ycsb_temp.txt
 			;;
 
 
@@ -80,7 +84,7 @@ do
         echo "#############################"
         echo "#          GraphBig         #"
         echo "#############################"
-        cd ../graphbig
+        cd graphbig
 
         echo "PCM Core Test Beginning:"
         echo "========================"
@@ -97,7 +101,8 @@ do
         done
         sudo make run
         cat output.log
-      } > graphbig_temp.txt
+				cd ..
+      } > $BENCHMARK_ROOT/graphbig_temp.txt
 			;;
 	esac
 done
@@ -107,9 +112,11 @@ done
 ####################################
 #             Metrics              #
 ####################################
+cd $BENCHMARK_ROOT
 for bench in "${benches[@]}"
 do
   echo "Averages for benchmark $bench"
+  echo "==============================="
 
   case $bench in
     dsb)
@@ -147,7 +154,6 @@ do
       check_lines=($(grep -n "\[OVERALL\], Throughput" ./"$bench"_temp.txt | cut -d: -f1))
       for line_check in "${check_lines[@]}"
       do
-      	# line_check=$(expr $line_check - 2)
       	insert_op=`sed -n $(expr $line_check - 2)p ./"$bench"_temp.txt | grep "INSERT" | wc -c`
         if [ $insert_op -ge 1 ]
       	then
@@ -160,10 +166,16 @@ do
       		other_throughput_num=$(( other_throughput_num + 1 ))
       	fi
       done
-      echo "Insert Throughput (ops/sec): " $(( insert_throughput_sum / insert_throughput_num ))
-      echo "Update/Read Throughput (ops/sec): " $(( other_throughput_sum / other_throughput_num ))
+			# if [ $insert_throughput_num -ge 1 ]
+			# then
+      	# echo "Insert Throughput (ops/sec): " $(( insert_throughput_sum / insert_throughput_num ))
+			# fi
+			if [ $other_throughput_num -ge 1 ]
+			then
+      	echo "Update/Read Throughput (ops/sec): " $(( other_throughput_sum / other_throughput_num ))
+			fi
 
-      operations=("INSERT" "READ" "UPDATE")
+      operations=("READ" "UPDATE")
       for operation in "${operations[@]}"
       do
   		  echo "$operation Latency (us): " \
@@ -205,12 +217,14 @@ do
     ./"$bench"_temp.txt`
 
   echo "System Write Throughput (MB/s): " \
-    `awk '/System Read Throughput/ {sum += $5; n++} END {if (n > 0) print sum / n}' \
+    `awk '/System Write Throughput/ {sum += $5; n++} END {if (n > 0) print sum / n}' \
     ./"$bench"_temp.txt`
 
   echo "System Memory Throughput (MB/s): " \
-    `awk '/System Read Throughput/ {sum += $5; n++} END {if (n > 0) print sum / n}' \
+    `awk '/System Memory Throughput/ {sum += $5; n++} END {if (n > 0) print sum / n}' \
     ./"$bench"_temp.txt`
+
+	echo ""
 done
 
 if [ "$keep_logs" == "false" ]
