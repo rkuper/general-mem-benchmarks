@@ -1,0 +1,34 @@
+diff --git a/hotelReservation/Dockerfile b/hotelReservation/Dockerfile
+index 0ef5ef0..49c9ed1 100644
+--- a/hotelReservation/Dockerfile
++++ b/hotelReservation/Dockerfile
+@@ -1,4 +1,6 @@
+ FROM golang:1.9
++RUN apt update && apt install ca-certificates libgnutls30 -y
++
+
+ COPY . /go/src/github.com/harlow/go-micro-services
+ WORKDIR /go/src/github.com/harlow/go-micro-services
+diff --git a/mediaMicroservices/wrk2/Makefile b/mediaMicroservices/wrk2/Makefile
+index 9d454b1..46241b2 100644
+--- a/mediaMicroservices/wrk2/Makefile
++++ b/mediaMicroservices/wrk2/Makefile
+@@ -1,4 +1,4 @@
+-CFLAGS  := -std=c99 -Wall -O2 -D_REENTRANT
++CFLAGS  := -std=c99 -Wall -O2 -D_REENTRANT -fPIE
+ LIBS    := -lpthread -lm -lcrypto -lssl
+
+ TARGET  := $(shell uname -s | tr '[A-Z]' '[a-z]' 2>/dev/null || echo unknown)
+diff --git a/mediaMicroservices/wrk2/deps/luajit/src/Makefile b/mediaMicroservices/wrk2/deps/luajit/src/Makefile
+index 9551781..2fe7acd 100644
+--- a/mediaMicroservices/wrk2/deps/luajit/src/Makefile
++++ b/mediaMicroservices/wrk2/deps/luajit/src/Makefile
+@@ -25,7 +25,7 @@ NODOTABIVER= 51
+ # with "make clean", followed by "make" if you change any options.
+ #
+ # LuaJIT builds as a native 32 or 64 bit binary by default.
+-CC= gcc
++CC= gcc -no-pie
+ #
+ # Use this if you want to force a 32 bit build on a 64 bit multilib OS.
+ #CC= gcc -m32
