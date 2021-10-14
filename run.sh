@@ -67,6 +67,7 @@ for BENCHMARK in "${BENCHMARKS[@]}"
 do
   case $BENCHMARK in
     dsb)
+      START_DSB_TIME=$(date +%s)
       for DSB_BENCHMARK in "${DSB_BENCHMARKS[@]}"
       do
           DSB_DIRECTORY="hotelReservation"
@@ -99,7 +100,7 @@ do
 
           echo "PCM Test Beginning:"
           echo "==================="
-          for run in $(eval echo {1..$total_runs})
+          for run in $(eval echo {1..$TOTAL_RUNS})
           do
             sudo pcm --external_program \
                     sudo pcm-memory --external_program \
@@ -108,11 +109,13 @@ do
           cd ../../
         } > "$LOG_FILE"
       done
+      END_DSB_TIME=$(date +%s)
       ;;
 
 
 
     ycsb)
+      START_YCSB_TIME=$(date +%s)
       for YCSB_BENCHMARK in "${YCSB_BENCHMARKS[@]}"
       do
         LOG_FILE="${LOG_DIRECTORY}/${BENCHMARK}_${YCSB_BENCHMARK}.log"
@@ -126,7 +129,7 @@ do
 
           echo "PCM Test Beginning:"
           echo "==================="
-          for run in $(eval echo {1..$total_runs})
+          for run in $(eval echo {1..$TOTAL_RUNS})
           do
             sudo pcm --external_program \
                     sudo pcm-memory --external_program \
@@ -136,11 +139,13 @@ do
           done
         } > "$LOG_FILE"
       done
+      END_YCSB_TIME=$(date +%s)
       ;;
 
 
 
     graphbig)
+      START_GRAPHBIG_TIME=$(date +%s)
       LOG_FILE="${BENCHMARK}.log"
       {
         echo "#############################"
@@ -150,7 +155,7 @@ do
 
         echo "PCM Test Beginning:"
         echo "==================="
-        for run in $(eval echo {1..$total_runs})
+        for run in $(eval echo {1..$TOTAL_RUNS})
         do
           sudo pcm --external_program \
                   sudo pcm-memory --external_program \
@@ -160,6 +165,7 @@ do
         cat output.log
         cd ..
       } > "$LOG_FILE"
+      END_GRAPHBIG_TIME=$(date +%s)
       ;;
   esac
 done
@@ -279,11 +285,14 @@ done
     echo ""
   done
   END_TIME=$(date +%s)
-  echo "Elapsed Testing Time: $(($END_TIME - $START_TIME)) seconds"
+  echo "[DEATHSTARBENCH] Elapsed Benchmarking Time: $(($END_DSB_TIME - $START_DSB_TIME)) seconds"
+  echo "[YCSB          ] Elapsed Benchmarking Time: $(($END_YCSB_TIME - $START_YCSB_TIME)) seconds"
+  echo "[GRAPHGIB      ] Elapsed Benchmarking Time: $(($END_GRAPHBIG_TIME - $START_GRAPHBIG_TIME)) seconds"
+  echo "[OVERALL       ] Elapsed Benchmarking Time: $(($END_TIME - $START_TIME)) seconds"
 } > "$LOG_DIRECTORY"/results.txt
 
 
-if [ "$keep_logs" == "false" ]
+if [ "$KEEP_LOGS" == "false" ]
 then
     rm "$LOG_DIRECTORY"/*.log
 fi
