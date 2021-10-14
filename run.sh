@@ -38,8 +38,14 @@ DEFAULT_USER=`users | awk '{print $1}'`
 declare -a DSB_BENCHMARKS=("hotel" "media")
 declare -a YCSB_BENCHMARKS=("a" "b" "c" "f" "d")
 
+if [[ -z "${MEM_BENCHMARK_ROOT}" ]]; then
+  MEM_BENCHMARK_ROOT=/home/"$DEFAULT_USER"/Documents/benchmarks/mem-benchmarks
+else
+  MEM_BENCHMARK_ROOT="${MEM_BENCHMARK_ROOT}"
+fi
+
 if [[ -z "${LOG_DIRECTORY}" ]]; then
-  LOG_DIRECTORY="./logs"
+  LOG_DIRECTORY="${MEM_BENCHMARK_ROOT}/logs"
 else
   LOG_DIRECTORY="${LOG_DIRECTORY}"
 fi
@@ -56,6 +62,7 @@ cd $BENCHMARK_ROOT
 ####################################
 #            Benchmarks            #
 ####################################
+START_TIME=$(date +%s)
 for BENCHMARK in "${BENCHMARKS[@]}"
 do
   case $BENCHMARK in
@@ -81,7 +88,7 @@ do
                 ;;
           esac
 
-        LOG_FILE=""$LOG_DIRECTORY"/"$BENCHMARK"_"$DSB_BENCHMARK".log"
+        LOG_FILE="${LOG_DIRECTORY}/${BENCHMARK}_${DSB_BENCHMARK}.log"
         {
           echo "#############################"
           echo "#   DeathStarBench: ${DSB_BENCHMARK}   #"
@@ -95,8 +102,7 @@ do
           for run in $(eval echo {1..$total_runs})
           do
             sudo pcm --external_program \
-                    sudo ./wrk2/wrk -D exp -L -s "$DSB_LUA" "$DSB_LOCALHOST" -t 2 -R 10000 -d 200
-            sudo pcm-memory --external_program \
+                    sudo pcm-memory --external_program \
                     sudo ./wrk2/wrk -D exp -L -s "$DSB_LUA" "$DSB_LOCALHOST" -t 2 -R 10000 -d 200
           done
           cd ../../
@@ -109,7 +115,7 @@ do
     ycsb)
       for YCSB_BENCHMARK in "${YCSB_BENCHMARKS[@]}"
       do
-        LOG_FILE=""$LOG_DIRECTORY"/"$BENCHMARK"_"$YCSB_BENCHMARK".log"
+        LOG_FILE="${LOG_DIRECTORY}/${BENCHMARK}_${YCSB_BENCHMARK}.log"
         {
           echo "#############################"
           echo "#        YCSB - ${YCSB_BENCHMARK}         #"
@@ -123,11 +129,7 @@ do
           for run in $(eval echo {1..$total_runs})
           do
             sudo pcm --external_program \
-                    sudo "$BENCHMARK_ROOT"/ycsb-0.17.0/bin/ycsb run basic -P "$BENCHMARK_ROOT"/ycsb-0.17.0/workloads/workload"$YCSB_BENCHMARK" \
-                    -P "$BENCHMARK_ROOT"/ycsb-0.17.0/large.dat -threads 10 -target 15000 > transactions.dat
-            tail -n 110 transactions.dat; transactions.dat
-
-            sudo pcm-memory --external_program \
+                    sudo pcm-memory --external_program \
                     sudo "$BENCHMARK_ROOT"/ycsb-0.17.0/bin/ycsb run basic -P "$BENCHMARK_ROOT"/ycsb-0.17.0/workloads/workload"$YCSB_BENCHMARK" \
                     -P "$BENCHMARK_ROOT"/ycsb-0.17.0/large.dat -threads 10 -target 15000 > transactions.dat
             tail -n 110 transactions.dat; transactions.dat
@@ -139,7 +141,7 @@ do
 
 
     graphbig)
-      LOG_FILE=""$BENCHMARK".log"
+      LOG_FILE="${BENCHMARK}.log"
       {
         echo "#############################"
         echo "#          GraphBig         #"
@@ -151,8 +153,7 @@ do
         for run in $(eval echo {1..$total_runs})
         do
           sudo pcm --external_program \
-                  sudo make run
-          sudo pcm-memory --external_program \
+                  sudo pcm-memory --external_program \
                   sudo make run
         done
         sudo make run
@@ -179,7 +180,7 @@ done
       dsb)
         for DSB_BENCHMARK in "${DSB_BENCHMARKS[@]}"
         do
-          LOG_FILE=""$LOG_DIRECTORY"/"$BENCHMARK"_"$DSB_BENCHMARK".log"
+          LOG_FILE="${LOG_DIRECTORY}/${BENCHMARK}_${DSB_BENCHMARK}.log"
           echo "Averages for workload ${DSB_BENCHMARK}:"
           echo "=============================="
           echo "Requests/sec: " \
@@ -216,7 +217,7 @@ done
       ycsb)
         for YCSB_BENCHMARK in "${YCSB_BENCHMARKS[@]}"
         do
-          LOG_FILE=""$LOG_DIRECTORY"/"$BENCHMARK"_"$YCSB_BENCHMARK".log"
+          LOG_FILE="${LOG_DIRECTORY}/${BENCHMARK}_${YCSB_BENCHMARK}.log"
           echo "Averages for workload ${YCSB_BENCHMARK}:"
           echo "========================"
           insert_throughput_num=0
@@ -270,19 +271,21 @@ done
 
 
       graphbig)
-        LOG_FILE=""$BENCHMARK".log"
+        LOG_FILE="${BENCHMARK}.log"
         print_generic_metrics "$LOG_FILE"
         ;;
     esac
 
     echo ""
   done
+  END_TIME=$(date +%s)
+  echo "Elapsed Testing Time: $(($END_TIME - $START_TIME)) seconds"
 } > "$LOG_DIRECTORY"/results.txt
 
 
 if [ "$keep_logs" == "false" ]
 then
-    rm *.log
+    rm "$LOG_DIRECTORY"/*.log
 fi
 
 print_generic_metrics () {
