@@ -86,13 +86,6 @@ else
   LOG_DIRECTORY="${LOG_DIRECTORY}"
 fi
 
-if [[ -z "${BENCHMARK_ROOT}" ]]; then
-  BENCHMARK_ROOT=/home/"$DEFAULT_USER"/Documents/benchmarks
-else
-  BENCHMARK_ROOT="${BENCHMARK_ROOT}"
-fi
-cd $BENCHMARK_ROOT
-
 
 
 ####################################
@@ -130,7 +123,7 @@ do
           echo "#############################"
           echo "#   DeathStarBench: ${DSB_BENCHMARK}   #"
           echo "#############################"
-          cd deathstarbench/"$DSB_DIRECTORY"
+          cd DeathStarBench/"$DSB_DIRECTORY"
           sudo docker stop `docker ps -qa`
           docker-compose up -d
 
@@ -175,10 +168,9 @@ do
           echo "PCM Test Beginning:"
           echo "==================="
 
-          sudo "$BENCHMARK_ROOT"/ycsb-0.17.0/bin/ycsb load basic \
-                  -P "$BENCHMARK_ROOT"/ycsb-0.17.0/workloads/workload"$YCSB_BENCHMARK" \
+          sudo "$MEM_BENCHMARK_ROOT"/ycsb-0.17.0/bin/ycsb load basic \
+                  -P "$MEM_BENCHMARK_ROOT"/ycsb-0.17.0/workloads/workload"$YCSB_BENCHMARK" \
                   -p recordcount="$YCSB_COUNTS" -p operationcount="$YCSB_COUNTS" -threads 10 -target 15000 > load.dat
-                  # -P "$BENCHMARK_ROOT"/ycsb-0.17.0/large.dat -threads 10 -target 15000 > load.dat
           tail -n 150 load.dat
 
           for run in $(eval echo {1..$TOTAL_RUNS})
@@ -186,10 +178,9 @@ do
             TEMP_START_TIME=$(date +%s%N)
             sudo pcm --external_program \
                     sudo pcm-memory --external_program \
-                    sudo "$BENCHMARK_ROOT"/ycsb-0.17.0/bin/ycsb run basic \
-                    -P "$BENCHMARK_ROOT"/ycsb-0.17.0/workloads/workload"$YCSB_BENCHMARK" \
+                    sudo "$MEM_BENCHMARK_ROOT"/ycsb-0.17.0/bin/ycsb run basic \
+                    -P "$MEM_BENCHMARK_ROOT"/ycsb-0.17.0/workloads/workload"$YCSB_BENCHMARK" \
                     -p recordcount="$YCSB_COUNTS" -p operationcount="$YCSB_COUNTS" -threads 10 -target 15000 > transactions.dat
-                    # -P "$BENCHMARK_ROOT"/ycsb-0.17.0/large.dat -threads 10 -target 15000 > transactions.dat
             TEMP_END_TIME=$(date +%s%N)
             tail -n 150 transactions.dat; rm transactions.dat
             case $YCSB_BENCHMARK in
@@ -226,7 +217,7 @@ do
         echo "#############################"
         echo "#          GraphBig         #"
         echo "#############################"
-        cd graphbig
+        cd graphBIG
 
         echo "PCM Test Beginning:"
         echo "==================="
@@ -354,8 +345,7 @@ print_generic_metrics () {
           for line_check in "${check_lines[@]}"
           do
             insert_op=`sed -n $(expr $line_check - 2)p "$LOG_FILE" | grep "INSERT" | wc -c`
-            if [ $insert_op -ge 1 ]
-            then
+            if [ $insert_op -ge 1 ]; then
               insert_throughput_sum=$(( insert_throughput_sum + `sed -n $(expr $line_check)p \
                 "$LOG_FILE" | awk '{print $3}' | cut -d. -f1` ))
               insert_throughput_num=$(( insert_throughput_num + 1 ))
@@ -365,12 +355,10 @@ print_generic_metrics () {
               other_throughput_num=$(( other_throughput_num + 1 ))
             fi
           done
-          if [ $insert_throughput_num -ge 1 ]
-          then
+          if [ $insert_throughput_num -ge 1 ]; then
             echo "Insert Throughput (ops/sec): " $(( insert_throughput_sum / insert_throughput_num ))
           fi
-          if [ $other_throughput_num -ge 1 ]
-          then
+          if [ $other_throughput_num -ge 1 ]; then
             echo "Update/Read Throughput (ops/sec): " $(( other_throughput_sum / other_throughput_num ))
           fi
 
