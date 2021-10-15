@@ -23,7 +23,19 @@ fi
 #################################
 #        SETUP GRAPHBIG         #
 #################################
+# Will need CUDA toolkit (and NVIDIA GPU) for GraphBIG
+if [ "$(which nvcc)" == "" ]; then
+  wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
+  sudo mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
+  wget https://developer.download.nvidia.com/compute/cuda/11.4.2/local_installers/cuda-repo-ubuntu2004-11-4-local_11.4.2-470.57.02-1_amd64.deb
+  sudo dpkg -i cuda-repo-ubuntu2004-11-4-local_11.4.2-470.57.02-1_amd64.deb
+  sudo apt-key add /var/cuda-repo-ubuntu2004-11-4-local/7fa2af80.pub
+  sudo apt-get update
+  sudo apt-get -y install cuda nvidia-cuda-toolkit
+fi
+
 # Download GraphBIG datasets
+# Additional Datasets can be found at: https://graphalytics.org/datasets
 if [ ! -d ./graphBIG/dataset/cit-patent ]; then
   curl -L "https://atlarge.ewi.tudelft.nl/graphalytics/zip/cit-Patents.zip" --output ./cit-patent.zip
   unzip cit-patent.zip
@@ -45,17 +57,6 @@ if [ ! -d ./graphBIG/dataset/graph500-22 ]; then
   echo "vertex" > graph500-22/vertex.csv
   cat graph500-22/graph500-22.v >> graph500-22/vertex.csv
   mv graph500-22 graphBIG/dataset
-fi
-
-# Will need CUDA toolkit (and NVIDIA GPU) for GraphBIG
-if [ "$(which nvcc)" == "" ]; then
-  wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
-  sudo mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
-  wget https://developer.download.nvidia.com/compute/cuda/11.4.2/local_installers/cuda-repo-ubuntu2004-11-4-local_11.4.2-470.57.02-1_amd64.deb
-  sudo dpkg -i cuda-repo-ubuntu2004-11-4-local_11.4.2-470.57.02-1_amd64.deb
-  sudo apt-key add /var/cuda-repo-ubuntu2004-11-4-local/7fa2af80.pub
-  sudo apt-get update
-  sudo apt-get -y install cuda nvidia-cuda-toolkit
 fi
 
 
