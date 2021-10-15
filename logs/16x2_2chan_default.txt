@@ -1,0 +1,141 @@
+###############################
+Averages for benchmark dsb
+###############################
+
+Averages for workload hotel:
+==============================
+Requests/sec:  9434.63
+Transfer/sec:  2.41333
+Average Latency:  7.88333
+50.000% Tail:  7.69
+90.000% Tail:  14.2533
+99.000% Tail:  15.68
+IPC:  1.00333
+L2 Hit Rate:  0.436667
+L3 Hit Rate:  0.873333
+LLC Read Miss Latency:  84.11
+System Read Throughput (MB/s):  443.867
+System Write Throughput (MB/s):  236.66
+System Memory Throughput (MB/s):  680.527
+
+Averages for workload media:
+==============================
+Requests/sec:  580.823
+Transfer/sec:  202.497
+Average Latency:  8.25667
+50.000% Tail:  8.31333
+90.000% Tail:  14.7533
+99.000% Tail:  16.23
+IPC:  0.753333
+L2 Hit Rate:  0.22
+L3 Hit Rate:  0.956667
+LLC Read Miss Latency:  93.9067
+System Read Throughput (MB/s):  453.343
+System Write Throughput (MB/s):  181
+System Memory Throughput (MB/s):  634.343
+
+
+
+###############################
+Averages for benchmark ycsb
+###############################
+
+Averages for workload a:
+========================
+READ Latency (us): 
+READ 95% Tail Latency (us): 
+READ 99% Tail Latency (us):  156.333
+UPDATE Latency (us):  51.5925
+UPDATE 95% Tail Latency (us):  118
+UPDATE 99% Tail Latency (us):  161.667
+IPC:  0.46
+L2 Hit Rate:  0.396667
+L3 Hit Rate:  0.803333
+LLC Read Miss Latency:  204.21
+System Read Throughput (MB/s):  132.09
+System Write Throughput (MB/s):  31.7467
+System Memory Throughput (MB/s):  163.847
+
+Averages for workload b:
+========================
+READ Latency (us): 
+READ 95% Tail Latency (us): 
+READ 99% Tail Latency (us):  172.333
+UPDATE Latency (us):  55.7794
+UPDATE 95% Tail Latency (us):  126
+UPDATE 99% Tail Latency (us):  183.333
+IPC:  0.443333
+L2 Hit Rate:  0.39
+L3 Hit Rate:  0.803333
+LLC Read Miss Latency:  206.063
+System Read Throughput (MB/s):  119.97
+System Write Throughput (MB/s):  22.04
+System Memory Throughput (MB/s):  142.007
+
+Averages for workload c:
+========================
+READ Latency (us):  52.69
+READ 95% Tail Latency (us):  134.333
+READ 99% Tail Latency (us):  194.333
+UPDATE Latency (us): 
+UPDATE 95% Tail Latency (us): 
+UPDATE 99% Tail Latency (us): 
+IPC:  0.446667
+L2 Hit Rate:  0.4
+L3 Hit Rate:  0.8
+LLC Read Miss Latency:  206.327
+System Read Throughput (MB/s):  118.633
+System Write Throughput (MB/s):  21.0433
+System Memory Throughput (MB/s):  139.68
+
+Averages for workload f:
+========================
+READ Latency (us): 
+READ 95% Tail Latency (us): 
+READ 99% Tail Latency (us): 
+UPDATE Latency (us):  48.1417
+UPDATE 95% Tail Latency (us):  177.667
+UPDATE 99% Tail Latency (us):  276
+IPC:  0.483333
+L2 Hit Rate:  0.416667
+L3 Hit Rate:  0.826667
+LLC Read Miss Latency:  202.353
+System Read Throughput (MB/s):  136.403
+System Write Throughput (MB/s):  35.2233
+System Memory Throughput (MB/s):  171.627
+
+Averages for workload d:
+========================
+READ Latency (us): 
+READ 95% Tail Latency (us): 
+READ 99% Tail Latency (us):  156.333
+UPDATE Latency (us): 
+UPDATE 95% Tail Latency (us): 
+UPDATE 99% Tail Latency (us): 
+IPC:  0.46
+L2 Hit Rate:  0.396667
+L3 Hit Rate:  0.793333
+LLC Read Miss Latency:  204.113
+System Read Throughput (MB/s):  130.48
+System Write Throughput (MB/s):  30.4133
+System Memory Throughput (MB/s):  160.897
+
+
+
+###############################
+Averages for benchmark graphbig
+###############################
+IPC:  0.676667
+L2 Hit Rate:  0.126667
+L3 Hit Rate:  0.12
+LLC Read Miss Latency:  83.9333
+System Read Throughput (MB/s):  1479.44
+System Write Throughput (MB/s):  608.93
+System Memory Throughput (MB/s):  2088.37
+
+
+
+[DEATHSTARBENCH] Elapsed Benchmarking Time: 1921 seconds
+[YCSB          ] Elapsed Benchmarking Time: 8018 seconds
+[GRAPHGIB      ] Elapsed Benchmarking Time: 1727 seconds
+[OVERALL       ] Elapsed Benchmarking Time: 11666 seconds

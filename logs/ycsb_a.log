@@ -1,0 +1,104 @@
+#############################
+#        YCSB - a         #
+#############################
+PCM Test Beginning:
+===================
+INFO: Linux perf interface to program uncore PMUs is present
+Initializing RMIDs
+INFO: Linux perf interface to program uncore PMUs is present
+Initializing RMIDs
+|---------------------------------------|
+|--             Socket  0             --|
+|---------------------------------------|
+|--     Memory Channel Monitoring     --|
+|---------------------------------------|
+|-- Mem Ch  0: Reads (MB/s):   178.29 --|
+|--            Writes(MB/s):   187.58 --|
+|-- Mem Ch  1: Reads (MB/s):   182.53 --|
+|--            Writes(MB/s):   191.54 --|
+|-- NODE 0 Mem Read (MB/s) :   360.81 --|
+|-- NODE 0 Mem Write(MB/s) :   379.12 --|
+|-- NODE 0 P. Write (T/s):      62695 --|
+|-- NODE 0 Memory (MB/s):      739.93 --|
+|---------------------------------------|
+            |---------------------------------------||---------------------------------------|
+            |--                 System Read Throughput(MB/s):        360.81                --|
+            |--                System Write Throughput(MB/s):        379.12                --|
+            |--               System Memory Throughput(MB/s):        739.93                --|
+            |---------------------------------------||---------------------------------------|
+
+ EXEC  : instructions per nominal CPU cycle
+ IPC   : instructions per CPU cycle
+ FREQ  : relation to nominal CPU frequency='unhalted clock ticks'/'invariant timer ticks' (includes Intel Turbo Boost)
+ AFREQ : relation to nominal CPU frequency while in active state (not in power-saving C state)='unhalted clock ticks'/'invariant timer ticks while in C0-state'  (includes Intel Turbo Boost)
+ L3MISS: L3 (read) cache misses 
+ L2MISS: L2 (read) cache misses (including other core's L2 cache *hits*) 
+ L3HIT : L3 (read) cache hit ratio (0.00-1.00)
+ L2HIT : L2 cache hit ratio (0.00-1.00)
+ L3MPI : number of L3 (read) cache misses per instruction
+ L2MPI : number of L2 (read) cache misses per instruction
+ READ  : bytes read from main memory controller (in GBytes)
+ WRITE : bytes written to main memory controller (in GBytes)
+ LOCAL : ratio of local memory requests to memory controller in %
+LLCRDMISSLAT: average latency of last level cache miss for reads and prefetches (in ns)
+ L3OCC : L3 occupancy (in KBytes)
+ LMB   : L3 cache external bandwidth satisfied by local memory (in MBytes)
+ RMB   : L3 cache external bandwidth satisfied by remote memory (in MBytes)
+ TEMP  : Temperature reading in 1 degree Celsius relative to the TjMax temperature (thermal headroom): 0 corresponds to the max temperature
+ energy: Energy in Joules
+
+
+ Core (SKT) | EXEC | IPC  | FREQ  | AFREQ | L3MISS | L2MISS | L3HIT | L2HIT | L3MPI | L2MPI |   L3OCC |   LMB  |   RMB  | TEMP
+
+   0    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     3416   565702        0     69
+   1    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     6216    26203        0     70
+   2    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     6048    10255        0     69
+   3    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     5208    88093        0     70
+   4    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     3696   739919        0     69
+   5    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     3304   769999        0     68
+   6    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     3416   151769        0     68
+   7    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     5824    27238        0     69
+   8    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     3304   798826        0     70
+   9    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     5432   810676        0     69
+  10    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     3304   761728        0     69
+  11    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     6160   860216        0     68
+  12    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     6048   907948        0     68
+  13    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     5712    83273        0     70
+  14    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     4368   260276        0     69
+  15    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     6160   198512        0     70
+  16    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     5544   127357        0     69
+  17    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     6216    72673        0     70
+  18    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     6832   856320        0     69
+  19    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     3416   779633        0     68
+  20    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     5208   844412        0     68
+  21    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     5712   867608        0     69
+  22    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     5432   863152        0     70
+  23    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     5432   750829        0     69
+  24    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     5432   769241        0     69
+  25    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     3696   731942        0     69
+  26    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     6160   118917        0     68
+  27    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     5544   885197        0     70
+---------------------------------------------------------------------------------------------------------------
+ SKT    0     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan   142240   14727914        0     64
+---------------------------------------------------------------------------------------------------------------
+ TOTAL  *     0.00   -1.00   0.00    -1.00       0        0      -nan    -nan    -nan    -nan     N/A     N/A     N/A      N/A
+
+ Instructions retired:    0   ; Active cycles:    0   ; Time (TSC):  373 Mticks ; C0 (active,non-halted) core residency: 0.00 %
+
+ C1 core residency: 33.00 %; C3 core residency: 0.00 %; C6 core residency: 67.00 %; C7 core residency: 0.00 %;
+ C0 package residency: 100.00 %; C2 package residency: 0.00 %; C3 package residency: 0.00 %; C6 package residency: 0.00 %; C7 package residency: 0.00 %;
+                             ┌────────────────────────────────────────────────────────────────────────────────┐
+ Core    C-state distribution│11111111111111111111111111666666666666666666666666666666666666666666666666666666│
+                             └────────────────────────────────────────────────────────────────────────────────┘
+                             ┌────────────────────────────────────────────────────────────────────────────────┐
+ Package C-state distribution│00000000000000000000000000000000000000000000000000000000000000000000000000000000│
+                             └────────────────────────────────────────────────────────────────────────────────┘
+
+ PHYSICAL CORE IPC                 : -1.00 => corresponds to -25.00 % utilization for cores in active state
+ Instructions per nominal CPU cycle: 0.00 => corresponds to 0.00 % core utilization over time interval
+ SMI count: 0
+---------------------------------------------------------------------------------------------------------------
+MEM (GB)->|  READ |  WRITE | LOCAL | CPU energy | DIMM energy | LLCRDMISSLAT (ns)
+---------------------------------------------------------------------------------------------------------------
+ SKT   0     0.04     0.04  100 %       4.27       0.00          95.72
+---------------------------------------------------------------------------------------------------------------
