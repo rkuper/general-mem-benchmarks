@@ -15,6 +15,14 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
       ;;
+    -o|--output)
+      OUTPUT_FILE="$2"
+      shift; shift
+      ;;
+    -s|--size)
+      SIZE="$2"
+      shift; shift
+      ;;
     -l|--keep_logs)
       KEEP_LOGS="$2"
       shift
@@ -32,7 +40,28 @@ BENCHMARKS=($BENCHMARKS)
 REGEX_NUM='^[0-9]+$'
 TOTAL_RUNS=$([[ -v TOTAL_RUNS && $TOTAL_RUNS =~ $REGEX_NUM ]] && echo "$TOTAL_RUNS" || echo "1")
 KEEP_LOGS=$([ -v KEEP_LOGS -o -z KEEP_LOGS ] && echo "true" || echo "false")
+OUTPUT_FILE=$([ -v OUTPUT_FILE ] && echo "$OUTPUT_FILE" || echo "results.txt")
 DEFAULT_USER=`users | awk '{print $1}'`
+
+SIZE=$([ -v SIZE ] && echo "$SIZE" || echo "medium")
+case $SIZE in
+  small)
+    YCSB_COUNTS=60000
+    DSB_DURATION=60
+    ;;
+  medium)
+    YCSB_COUNTS=600000
+    DSB_DURATION=200
+    ;;
+  large)
+    YCSB_COUNTS=6000000
+    DSB_DURATION=300
+    ;;
+  *)
+    YCSB_COUNTS=600000
+    DSB_DURATION=200
+    ;;
+esac
 
 declare -a DSB_BENCHMARKS=("hotel" "media")
 declare -a YCSB_BENCHMARKS=("a" "b" "c" "f" "d")
@@ -102,17 +131,17 @@ do
           echo "#   DeathStarBench: ${DSB_BENCHMARK}   #"
           echo "#############################"
           cd deathstarbench/"$DSB_DIRECTORY"
-          # sudo docker stop `docker ps -qa`
-          # docker-compose up -d
+          sudo docker stop `docker ps -qa`
+          docker-compose up -d
 
           echo "PCM Test Beginning:"
           echo "==================="
           for run in $(eval echo {1..$TOTAL_RUNS})
           do
             TEMP_START_TIME=$(date +%s%N)
-            # sudo pcm --external_program \
-            #         sudo pcm-memory --external_program \
-            #         sudo ./wrk2/wrk -D exp -L -s "$DSB_LUA" "$DSB_LOCALHOST" -t 2 -R 10000 -d 100
+            sudo pcm --external_program \
+                    sudo pcm-memory --external_program \
+                    sudo ./wrk2/wrk -D exp -L -s "$DSB_LUA" "$DSB_LOCALHOST" -t 2 -R 10000 -d "$DSB_DURATION"
             TEMP_END_TIME=$(date +%s%N)
             case $DSB_BENCHMARK in
               hotel)
@@ -143,12 +172,15 @@ do
           echo "#        YCSB - ${YCSB_BENCHMARK}         #"
           echo "#############################"
 
-          sudo "$BENCHMARK_ROOT"/ycsb-0.17.0/bin/ycsb load basic \
-                  -P "$BENCHMARK_ROOT"/ycsb-0.17.0/workloads/workload"$YCSB_BENCHMARK" \
-                  -P "$BENCHMARK_ROOT"/ycsb-0.17.0/large.dat -threads 10 -target 15000 > load.dat
-
           echo "PCM Test Beginning:"
           echo "==================="
+
+          sudo "$BENCHMARK_ROOT"/ycsb-0.17.0/bin/ycsb load basic \
+                  -P "$BENCHMARK_ROOT"/ycsb-0.17.0/workloads/workload"$YCSB_BENCHMARK" \
+                  -p recordcount="$YCSB_COUNTS" -p operationcount="$YCSB_COUNTS" -threads 10 -target 15000 > load.dat
+                  # -P "$BENCHMARK_ROOT"/ycsb-0.17.0/large.dat -threads 10 -target 15000 > load.dat
+          tail -n 150 load.dat
+
           for run in $(eval echo {1..$TOTAL_RUNS})
           do
             TEMP_START_TIME=$(date +%s%N)
@@ -156,10 +188,11 @@ do
                     sudo pcm-memory --external_program \
                     sudo "$BENCHMARK_ROOT"/ycsb-0.17.0/bin/ycsb run basic \
                     -P "$BENCHMARK_ROOT"/ycsb-0.17.0/workloads/workload"$YCSB_BENCHMARK" \
-                    -P "$BENCHMARK_ROOT"/ycsb-0.17.0/large.dat -threads 10 -target 15000 > transactions.dat
+                    -p recordcount="$YCSB_COUNTS" -p operationcount="$YCSB_COUNTS" -threads 10 -target 15000 > transactions.dat
+                    # -P "$BENCHMARK_ROOT"/ycsb-0.17.0/large.dat -threads 10 -target 15000 > transactions.dat
             TEMP_END_TIME=$(date +%s%N)
-            tail -n 110 transactions.dat; transactions.dat
-            case $DSB_BENCHMARK in
+            tail -n 150 transactions.dat; rm transactions.dat
+            case $YCSB_BENCHMARK in
               a)
                 YCSB_A_TIMINGS+=("$(($TEMP_END_TIME - $TEMP_START_TIME))")
                 ;;
@@ -259,6 +292,7 @@ print_generic_metrics () {
 
     case $BENCHMARK in
       dsb)
+        echo "[DEATHSTARBENCH] Elapsed Benchmarking Time: $(($END_DSB_TIME - $START_DSB_TIME)) nanoseconds"
         for DSB_BENCHMARK in "${DSB_BENCHMARKS[@]}"
         do
           LOG_FILE="${LOG_DIRECTORY}/${BENCHMARK}_${DSB_BENCHMARK}.log"
@@ -292,7 +326,6 @@ print_generic_metrics () {
 
           print_generic_metrics "$LOG_FILE"
 
-
           START_INDEX=$((`echo ${DSB_BENCHMARKS[@]/"$DSB_BENCHMARK"//} | cut -d/ -f1 | wc -w | tr -d ' '` * TOTAL_RUNS))
           TEMP_SUM=0
           for RUN in $(eval echo {$START_INDEX..$((START_INDEX + TOTAL_RUNS - 1))})
@@ -306,6 +339,7 @@ print_generic_metrics () {
 
 
       ycsb)
+        echo "[YCSB] Elapsed Benchmarking Time: $(($END_YCSB_TIME - $START_YCSB_TIME)) nanoseconds"
         for YCSB_BENCHMARK in "${YCSB_BENCHMARKS[@]}"
         do
           LOG_FILE="${LOG_DIRECTORY}/${BENCHMARK}_${YCSB_BENCHMARK}.log"
@@ -331,16 +365,35 @@ print_generic_metrics () {
               other_throughput_num=$(( other_throughput_num + 1 ))
             fi
           done
-          # if [ $insert_throughput_num -ge 1 ]
-          # then
-            # echo "Insert Throughput (ops/sec): " $(( insert_throughput_sum / insert_throughput_num ))
-          # fi
+          if [ $insert_throughput_num -ge 1 ]
+          then
+            echo "Insert Throughput (ops/sec): " $(( insert_throughput_sum / insert_throughput_num ))
+          fi
           if [ $other_throughput_num -ge 1 ]
           then
             echo "Update/Read Throughput (ops/sec): " $(( other_throughput_sum / other_throughput_num ))
           fi
 
-          operations=("READ" "UPDATE")
+          case $YCSB_BENCHMARK in
+            a)
+              operations=("INSERT" "READ" "UPDATE")
+              ;;
+            b)
+              operations=("INSERT" "READ" "UPDATE")
+              ;;
+            c)
+              operations=("INSERT" "READ")
+              ;;
+            f)
+              operations=("INSERT" "READ-MODIFY-WRITE" "UPDATE")
+              ;;
+            d)
+              operations=("INSERT" "READ")
+              ;;
+            *)
+              operations=("INSERT" "READ" "UPDATE")
+              ;;
+          esac
           for operation in "${operations[@]}"
           do
             echo "$operation Latency (us): " \
@@ -357,12 +410,21 @@ print_generic_metrics () {
           done
 
           print_generic_metrics "$LOG_FILE"
+
+          START_INDEX=$((`echo ${YCSB_BENCHMARKS[@]/"$YCSB_BENCHMARK"//} | cut -d/ -f1 | wc -w | tr -d ' '` * TOTAL_RUNS))
+          TEMP_SUM=0
+          for RUN in $(eval echo {$START_INDEX..$((START_INDEX + TOTAL_RUNS - 1))})
+          do
+            TEMP_SUM=$((YCSB_${YCSB_BENCHMARK^^}_TIMINGS[RUN % TOTAL_RUNS] + TEMP_SUM))
+          done
+          echo "[YCSB - ${YCSB_BENCHMARK^^}] Elapsed Benchmarking Time: $((TEMP_SUM/TOTAL_RUNS)) nanoseconds"
         done
         ;;
 
 
 
       graphbig)
+        echo "[GRAPHGIB] Elapsed Benchmarking Time: $(($END_GRAPHBIG_TIME - $START_GRAPHBIG_TIME)) nanoseconds"
         LOG_FILE="${LOG_DIRECTORY}/${BENCHMARK}.log"
         print_generic_metrics "$LOG_FILE"
         ;;
@@ -373,11 +435,8 @@ print_generic_metrics () {
     echo ""
   done
   END_TIME=$(date +%s%N)
-  echo "[DEATHSTARBENCH] Elapsed Benchmarking Time: $(($END_DSB_TIME - $START_DSB_TIME)) nanoseconds"
-  echo "[YCSB          ] Elapsed Benchmarking Time: $(($END_YCSB_TIME - $START_YCSB_TIME)) nanoseconds"
-  echo "[GRAPHGIB      ] Elapsed Benchmarking Time: $(($END_GRAPHBIG_TIME - $START_GRAPHBIG_TIME)) nanoseconds"
-  echo "[OVERALL       ] Elapsed Benchmarking Time: $(($END_TIME - $START_TIME)) nanoseconds"
-} > "$LOG_DIRECTORY"/results.txt
+  echo "[OVERALL] Elapsed Benchmarking Time: $(($END_TIME - $START_TIME)) nanoseconds"
+} > "$LOG_DIRECTORY"/"$OUTPUT_FILE"
 
 
 if [ "$KEEP_LOGS" == "false" ]
