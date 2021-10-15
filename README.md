@@ -6,7 +6,7 @@
  - c - 100% reads
  - d - Read latest workload
  - f - Read-modify-write
-- GraphBIG
+- GraphBIG (graph computing)
  - BFS
  - DFS
  - Connected Components
