@@ -1,0 +1,9 @@
+[submodule "DeathStarBench"]
+	path = DeathStarBench
+	url = https://github.com/delimitrou/DeathStarBench.git
+[submodule "graphBIG"]
+	path = graphBIG
+	url = https://github.com/graphbig/graphBIG.git
+[submodule "YCSB"]
+	path = YCSB
+	url = https://github.com/brianfrankcooper/YCSB.git
