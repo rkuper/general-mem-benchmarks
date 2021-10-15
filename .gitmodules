@@ -4,6 +4,3 @@
 [submodule "graphBIG"]
 	path = graphBIG
 	url = https://github.com/graphbig/graphBIG.git
-[submodule "YCSB"]
-	path = YCSB
-	url = https://github.com/brianfrankcooper/YCSB.git

@@ -41,7 +41,7 @@ if [ ! -d ./graphBIG/dataset/cit-patent ]; then
   unzip cit-patent.zip
   echo "edge1|edge2" > cit-patent/edge.csv
   cat cit-patent/cit-Patents.e >> cit-patent/edge.csv
-    sed -i 's/ /\|/g' edge.csv
+  sed -i 's/ /\|/g' edge.csv
   echo "vertex" > cit-patent/vertex.csv
   cat cit-patent/cit-Patents.v >> cit-patent/vertex.csv
   mv cit-patent graphBIG/dataset
@@ -53,11 +53,14 @@ if [ ! -d ./graphBIG/dataset/graph500-22 ]; then
   unzip graph500-22.zip
   echo "edge1|edge2" > graph500-22/edge.csv
   cat graph500-22/graph500-22.e >> graph500-22/edge.csv
-    sed -i 's/ /\|/g' edge.csv
+  sed -i 's/ /\|/g' edge.csv
   echo "vertex" > graph500-22/vertex.csv
   cat graph500-22/graph500-22.v >> graph500-22/vertex.csv
   mv graph500-22 graphBIG/dataset
 fi
+
+cd graphBIG; git apply ../benchmark-patches/graphbig.patch
+rm tools/libpfm-4.5.0/config.mk; cp ../benchmark-patches/config.mk tools/libpfm-4.5.0/config.mk
 
 
 
@@ -73,3 +76,15 @@ cd mediaMicroservices; docker stop `docker ps -qa`; docker-compose up -d
 python3 scripts/write_movie_info.py -c ./datasets/tmdb/casts.json -m ./datasets/tmdb/movies.json && scripts/register_users.sh && scripts/register_movies.sh
 cd wrk2; make
 cd ../../..
+
+#######################################
+#        SETUP DEATHSTARBENCH         #
+#######################################
+if [ ! -d ./ycsb-0.17.0 ]; then
+  curl -O --location https://github.com/brianfrankcooper/YCSB/releases/download/0.17.0/ycsb-0.17.0.tar.gz
+  tar xfvz ycsb-0.17.0.tar.gz
+  rm ycsb-0.17.0.tar.gz
+fi
+if [ "$(which mvn)" == "" ]; then
+  sudo apt install -y maven
+fi

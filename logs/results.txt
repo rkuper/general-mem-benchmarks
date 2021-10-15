@@ -1,0 +1,77 @@
+###############################
+Averages for benchmark ycsb
+###############################
+[YCSB] Average Elapsed Benchmarking Time: 53950379878 nanoseconds
+
+Averages for workload a:
+========================
+Insert Throughput (ops/sec):  14976
+Update/Read Throughput (ops/sec):  14977
+INSERT Latency (us):  70.443
+INSERT 95% Tail Latency (us):  155
+INSERT 99% Tail Latency (us):  279
+READ Latency (us):  47.8305
+READ 95% Tail Latency (us):  129.5
+READ 99% Tail Latency (us):  184
+UPDATE Latency (us):  54.3813
+UPDATE 95% Tail Latency (us):  136
+UPDATE 99% Tail Latency (us):  191
+[YCSB - A] Elapsed Benchmarking Time: 6935893951 nanoseconds
+
+Averages for workload b:
+========================
+Insert Throughput (ops/sec):  14976
+Update/Read Throughput (ops/sec):  14976
+INSERT Latency (us):  70.7874
+INSERT 95% Tail Latency (us):  145
+INSERT 99% Tail Latency (us):  304
+READ Latency (us):  39.2177
+READ 95% Tail Latency (us):  101.5
+READ 99% Tail Latency (us):  151.5
+UPDATE Latency (us):  55.1345
+UPDATE 95% Tail Latency (us):  125
+UPDATE 99% Tail Latency (us):  175
+[YCSB - B] Elapsed Benchmarking Time: 6942910354 nanoseconds
+
+Averages for workload c:
+========================
+Insert Throughput (ops/sec):  14979
+Update/Read Throughput (ops/sec):  14977
+INSERT Latency (us):  91.7044
+INSERT 95% Tail Latency (us):  231
+INSERT 99% Tail Latency (us):  355
+READ Latency (us):  39.1245
+READ 95% Tail Latency (us):  89
+READ 99% Tail Latency (us):  124.5
+[YCSB - C] Elapsed Benchmarking Time: 6951148893 nanoseconds
+
+Averages for workload f:
+========================
+Insert Throughput (ops/sec):  14974
+Update/Read Throughput (ops/sec):  14975
+INSERT Latency (us):  63.2294
+INSERT 95% Tail Latency (us):  132
+INSERT 99% Tail Latency (us):  215
+READ-MODIFY-WRITE Latency (us):  83.8221
+READ-MODIFY-WRITE 95% Tail Latency (us):  183
+READ-MODIFY-WRITE 99% Tail Latency (us):  362.5
+UPDATE Latency (us):  40.2584
+UPDATE 95% Tail Latency (us):  118.5
+UPDATE 99% Tail Latency (us):  203.5
+[YCSB - F] Elapsed Benchmarking Time: 6945343463 nanoseconds
+
+Averages for workload d:
+========================
+Insert Throughput (ops/sec):  14976
+Update/Read Throughput (ops/sec):  14976
+INSERT Latency (us):  73.3893
+INSERT 95% Tail Latency (us):  138.667
+INSERT 99% Tail Latency (us):  229.667
+READ Latency (us):  41.6363
+READ 95% Tail Latency (us):  94.5
+READ 99% Tail Latency (us):  142
+[YCSB - D] Elapsed Benchmarking Time: 6947616976 nanoseconds
+
+
+
+[OVERALL] Average Elapsed Benchmarking Time: 54091970340 nanoseconds

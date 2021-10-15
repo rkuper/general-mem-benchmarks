@@ -46,19 +46,19 @@ DEFAULT_USER=`users | awk '{print $1}'`
 SIZE=$([ -v SIZE ] && echo "$SIZE" || echo "medium")
 case $SIZE in
   small)
-    YCSB_COUNTS=60000
+    YCSB_COUNTS=100000
     DSB_DURATION=60
     ;;
   medium)
-    YCSB_COUNTS=600000
+    YCSB_COUNTS=1000000
     DSB_DURATION=200
     ;;
   large)
-    YCSB_COUNTS=6000000
+    YCSB_COUNTS=10000000
     DSB_DURATION=300
     ;;
   *)
-    YCSB_COUNTS=600000
+    YCSB_COUNTS=1000000
     DSB_DURATION=200
     ;;
 esac
@@ -118,6 +118,7 @@ do
                 ;;
           esac
 
+        echo "Running: DEATHSTARBENCH-${DSB_BENCHMARK^^}"
         LOG_FILE="${LOG_DIRECTORY}/${BENCHMARK}_${DSB_BENCHMARK}.log"
         {
           echo "#############################"
@@ -132,9 +133,10 @@ do
           for run in $(eval echo {1..$TOTAL_RUNS})
           do
             TEMP_START_TIME=$(date +%s%N)
-            sudo pcm --external_program \
-                    sudo pcm-memory --external_program \
-                    sudo ./wrk2/wrk -D exp -L -s "$DSB_LUA" "$DSB_LOCALHOST" -t 2 -R 10000 -d "$DSB_DURATION"
+            # sudo pcm --external_program \
+            #         sudo pcm-memory --external_program \
+            #         sudo ./wrk2/wrk -D exp -L -s "$DSB_LUA" "$DSB_LOCALHOST" -t 2 -R 10000 -d "$DSB_DURATION"
+            sudo ./wrk2/wrk -D exp -L -s "$DSB_LUA" "$DSB_LOCALHOST" -t 2 -R 10000 -d "$DSB_DURATION"
             TEMP_END_TIME=$(date +%s%N)
             case $DSB_BENCHMARK in
               hotel)
@@ -159,6 +161,7 @@ do
       START_YCSB_TIME=$(date +%s%N)
       for YCSB_BENCHMARK in "${YCSB_BENCHMARKS[@]}"
       do
+        echo "Running: YCSB-${YCSB_BENCHMARK^^}"
         LOG_FILE="${LOG_DIRECTORY}/${BENCHMARK}_${YCSB_BENCHMARK}.log"
         {
           echo "#############################"
@@ -176,9 +179,13 @@ do
           for run in $(eval echo {1..$TOTAL_RUNS})
           do
             TEMP_START_TIME=$(date +%s%N)
-            sudo pcm --external_program \
-                    sudo pcm-memory --external_program \
-                    sudo "$MEM_BENCHMARK_ROOT"/ycsb-0.17.0/bin/ycsb run basic \
+            # sudo pcm --external_program \
+            #         sudo pcm-memory --external_program \
+            #         sudo "$MEM_BENCHMARK_ROOT"/ycsb-0.17.0/bin/ycsb run basic \
+            #         -P "$MEM_BENCHMARK_ROOT"/ycsb-0.17.0/workloads/workload"$YCSB_BENCHMARK" \
+            #         -p recordcount="$YCSB_COUNTS" -p operationcount="$YCSB_COUNTS" -threads 10 -target 15000 > transactions.dat
+
+            sudo "$MEM_BENCHMARK_ROOT"/ycsb-0.17.0/bin/ycsb run basic \
                     -P "$MEM_BENCHMARK_ROOT"/ycsb-0.17.0/workloads/workload"$YCSB_BENCHMARK" \
                     -p recordcount="$YCSB_COUNTS" -p operationcount="$YCSB_COUNTS" -threads 10 -target 15000 > transactions.dat
             TEMP_END_TIME=$(date +%s%N)
@@ -212,6 +219,7 @@ do
 
     graphbig)
       START_GRAPHBIG_TIME=$(date +%s%N)
+      echo "Running: GraphBIG"
       LOG_FILE="${LOG_DIRECTORY}/${BENCHMARK}.log"
       {
         echo "#############################"
@@ -223,11 +231,17 @@ do
         echo "==================="
         for run in $(eval echo {1..$TOTAL_RUNS})
         do
-          sudo pcm --external_program \
-                  sudo pcm-memory --external_program \
-                  sudo make run
+          # sudo pcm --external_program \
+          #         sudo pcm-memory --external_program \
+          #         sudo make run
+          # sudo perf stat -e LLC-loads,LLC-load-misses,LLC-stores,LLC-store-misses \
+          #         sudo perf stat -M DRAM_BW_Use \
+          #         sudo perf stat -M DRAM_Read_Latency \
+          #         sudo perf stat -M Summary \
+          #         sudo make run
+          sudo make run
         done
-        sudo make run
+        # sudo make run
         cat output.log
         cd ..
       } > "$LOG_FILE"
@@ -283,7 +297,7 @@ print_generic_metrics () {
 
     case $BENCHMARK in
       dsb)
-        echo "[DEATHSTARBENCH] Elapsed Benchmarking Time: $(($END_DSB_TIME - $START_DSB_TIME)) nanoseconds"
+        echo "[DEATHSTARBENCH] Average Elapsed Benchmarking Time: $((($END_DSB_TIME - $START_DSB_TIME)/TOTAL_RUNS)) nanoseconds"
         for DSB_BENCHMARK in "${DSB_BENCHMARKS[@]}"
         do
           LOG_FILE="${LOG_DIRECTORY}/${BENCHMARK}_${DSB_BENCHMARK}.log"
@@ -315,7 +329,7 @@ print_generic_metrics () {
               "$LOG_FILE"`
           done
 
-          print_generic_metrics "$LOG_FILE"
+          # print_generic_metrics "$LOG_FILE"
 
           START_INDEX=$((`echo ${DSB_BENCHMARKS[@]/"$DSB_BENCHMARK"//} | cut -d/ -f1 | wc -w | tr -d ' '` * TOTAL_RUNS))
           TEMP_SUM=0
@@ -330,7 +344,7 @@ print_generic_metrics () {
 
 
       ycsb)
-        echo "[YCSB] Elapsed Benchmarking Time: $(($END_YCSB_TIME - $START_YCSB_TIME)) nanoseconds"
+        echo "[YCSB] Average Elapsed Benchmarking Time: $((($END_YCSB_TIME - $START_YCSB_TIME)/TOTAL_RUNS)) nanoseconds"
         for YCSB_BENCHMARK in "${YCSB_BENCHMARKS[@]}"
         do
           LOG_FILE="${LOG_DIRECTORY}/${BENCHMARK}_${YCSB_BENCHMARK}.log"
@@ -397,7 +411,7 @@ print_generic_metrics () {
               "$LOG_FILE"`
           done
 
-          print_generic_metrics "$LOG_FILE"
+          # print_generic_metrics "$LOG_FILE"
 
           START_INDEX=$((`echo ${YCSB_BENCHMARKS[@]/"$YCSB_BENCHMARK"//} | cut -d/ -f1 | wc -w | tr -d ' '` * TOTAL_RUNS))
           TEMP_SUM=0
@@ -412,9 +426,13 @@ print_generic_metrics () {
 
 
       graphbig)
-        echo "[GRAPHGIB] Elapsed Benchmarking Time: $(($END_GRAPHBIG_TIME - $START_GRAPHBIG_TIME)) nanoseconds"
+        echo "[GRAPHGIB] Average Elapsed Benchmarking Time: $((($END_GRAPHBIG_TIME - $START_GRAPHBIG_TIME)/TOTAL_RUNS)) nanoseconds"
         LOG_FILE="${LOG_DIRECTORY}/${BENCHMARK}.log"
-        print_generic_metrics "$LOG_FILE"
+        echo "Benchmark: <BENCHMARK_NAME>"
+        echo "== time: <LOAD_DATASET_TIME>"
+        echo "== time: <RUN_TIME>"
+        grep 'Benchmark\|time' graphBIG/output.log
+        # print_generic_metrics "$LOG_FILE"
         ;;
     esac
 
@@ -423,7 +441,7 @@ print_generic_metrics () {
     echo ""
   done
   END_TIME=$(date +%s%N)
-  echo "[OVERALL] Elapsed Benchmarking Time: $(($END_TIME - $START_TIME)) nanoseconds"
+  echo "[OVERALL] Average Elapsed Benchmarking Time: $((($END_TIME - $START_TIME)/TOTAL_RUNS)) nanoseconds"
 } > "$LOG_DIRECTORY"/"$OUTPUT_FILE"
 
 
