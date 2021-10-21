@@ -49,3 +49,6 @@ Options when running:
 
 Example: run three times per benchmark (averaging out results), keeping logs, and run only deathstarbench and ycsb with small workload input sizes:
 `$ ./run.sh -r 3 -l -b "dsb ycsb" -s small `
+
+## Notes
+Sections in run.sh are commented with "TODO:" where pcm would run to collect relevant metrics from the benchmarks.  
