@@ -133,9 +133,12 @@ do
           for run in $(eval echo {1..$TOTAL_RUNS})
           do
             TEMP_START_TIME=$(date +%s%N)
+            
+            # TODO: Performance metrics for IPC, cache hit rates, LLC Read Latency, and memory (read and write) throughput
             # sudo pcm --external_program \
             #         sudo pcm-memory --external_program \
             #         sudo ./wrk2/wrk -D exp -L -s "$DSB_LUA" "$DSB_LOCALHOST" -t 2 -R 10000 -d "$DSB_DURATION"
+            
             sudo ./wrk2/wrk -D exp -L -s "$DSB_LUA" "$DSB_LOCALHOST" -t 2 -R 10000 -d "$DSB_DURATION"
             TEMP_END_TIME=$(date +%s%N)
             case $DSB_BENCHMARK in
@@ -179,6 +182,8 @@ do
           for run in $(eval echo {1..$TOTAL_RUNS})
           do
             TEMP_START_TIME=$(date +%s%N)
+            
+            # TODO: Performance metrics for IPC, cache hit rates, LLC Read Latency, and memory (read and write) throughput
             # sudo pcm --external_program \
             #         sudo pcm-memory --external_program \
             #         sudo "$MEM_BENCHMARK_ROOT"/ycsb-0.17.0/bin/ycsb run basic \
@@ -231,6 +236,8 @@ do
         echo "==================="
         for run in $(eval echo {1..$TOTAL_RUNS})
         do
+        
+          # TODO: Performance metrics for IPC, cache hit rates, LLC Read Latency, and memory (read and write) throughput
           # sudo pcm --external_program \
           #         sudo pcm-memory --external_program \
           #         sudo make run
@@ -239,6 +246,7 @@ do
           #         sudo perf stat -M DRAM_Read_Latency \
           #         sudo perf stat -M Summary \
           #         sudo make run
+
           sudo make run
         done
         # sudo make run
